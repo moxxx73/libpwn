@@ -76,6 +76,12 @@ int kill_proc(PROC *proc){
     return 0;
 }
 
+void kfc_proc(PROC *proc){
+    kill_proc(proc);
+    free_proc(proc);
+    return;
+}
+
 PROC *process(char *args[], char blocking){
     PROC *ret=NULL;
     int pid=0;
@@ -131,10 +137,18 @@ PROC *process(char *args[], char blocking){
         memcpy(ptr, args[0], plen);
         ret->prog = ptr;
     }
+    ret->rbuf = (char *)malloc(PROC_RBUF_SIZE);
+    if(ret->rbuf) memset(ret->rbuf, 0, PROC_RBUF_SIZE);
     return ret;
 }
 
-int recvuntil(PROC *proc, char b, int lo){
+int proc_stat(PROC *proc){
+    int x=0;
+    waitpid(proc->pid, &x, 0);
+    return WEXITSTATUS(x);
+}
+
+int precvuntil(PROC *proc, char b, int lo){
     char *r_buf=NULL;
     int index=0;
     r_buf = (char *)malloc(PROC_RBUF_SIZE);
@@ -154,4 +168,12 @@ int recvuntil(PROC *proc, char b, int lo){
         index += lo;
     }
     return index;
+}
+
+int precv(PROC *proc, int size){
+    int ret=0;
+    if(!proc->rbuf) return -1;
+    memset(proc->rbuf, 0, PROC_RBUF_SIZE);
+    ret = read(proc->stdout, proc->rbuf, size);
+    return ret;
 }

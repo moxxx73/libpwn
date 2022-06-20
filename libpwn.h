@@ -42,6 +42,12 @@ void free_proc(PROC *proc);
 
 int kill_proc(PROC *proc);
 
+void kfc_proc(PROC *proc);
+
 PROC *process(char *args[], char blocking);
 
-int recvuntil(PROC *proc, char b, int lo);
+int proc_stat(PROC *proc);
+
+int precvuntil(PROC *proc, char b, int lo);
+
+int precv(PROC *proc, int size);
